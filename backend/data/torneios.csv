@@ -1,0 +1,11 @@
+TorneioID,Nome_do_Torneio,Tipo,Jogos_Inclusos
+T-001,LigaHub Major 2025,Major,"Volei,Street Fighter,Xadrez,Valorant,Truco,Tênis"
+T-002,Regional Sudeste (SP-RJ-BH),Regional,"Truco,Valorant,Volei,Tênis"
+T-003,Regional Sul (Curitiba),Regional,"Volei,Street Fighter,Tênis,Truco"
+T-004,Mensal de Julho,Mensal,"Xadrez,Valorant,Volei"
+T-005,Mensal de Agosto,Mensal,"Tênis,Street Fighter,Valorant"
+T-006,Mensal de Setembro,Mensal,"Street Fighter,Truco,Tênis"
+T-007,Minor Semanal #1,Minor,"Tênis,Street Fighter"
+T-008,Minor Semanal #2,Minor,"Valorant,Volei"
+T-009,Minor Semanal #3,Minor,"Street Fighter,Truco"
+T-010,Minor Semanal #4,Minor,"Truco,Valorant"
