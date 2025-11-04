@@ -1,13 +1,17 @@
-export const metadata = { title: "Esports MVP" };
 
-export default function RootLayout({ children }) {
+import "./globals.css";
+
+export const metadata = { title: "Liga Hub" };
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-br">
-      <body style={{ fontFamily: "ui-sans-serif,system-ui", margin: 0 }}>
-        <div style={{ padding: 16, borderBottom: "1px solid #eee" }}>
-          <strong>Esports MVP</strong> — Ligas, jogadores e torneios
-        </div>
-        <main style={{ padding: 24, maxWidth: 1000, margin: "0 auto" }}>{children}</main>
+      <body style={{ margin: 0, fontFamily: "ui-sans-serif, system-ui" }}>
+        <header style={{ padding: 12, borderBottom: "1px solid #eee", display: "flex", justifyContent: "space-between" }}>
+          <strong>Esports MVP</strong>
+          <span style={{ fontSize: 12, opacity: .6 }}>Next.js 16 + Flask</span>
+        </header>
+        {children}
       </body>
     </html>
   );
