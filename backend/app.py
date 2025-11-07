@@ -3,6 +3,8 @@ import os
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from sqlalchemy import create_engine, text
+from auth import bp as auth_bp
+from auth import login_required
 
 DB_HOST = os.getenv("DB_HOST", "localhost")
 DB_PORT = os.getenv("DB_PORT", "3306")
@@ -115,6 +117,13 @@ def search():
     with engine.connect() as conn:
         rows = conn.execute(text(sql + where + " LIMIT 50"), params).mappings().all()
     return jsonify([{**data} for data in rows])
+
+@app.get("/secure/ping")
+@login_required
+def secure_ping():
+    return {"ok": True, "user": getattr(request, "user", None)}
+
+app.register_blueprint(auth_bp)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

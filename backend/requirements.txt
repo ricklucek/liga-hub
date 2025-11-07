@@ -5,3 +5,6 @@ pymysql==1.1.0
 alembic==1.13.1
 python-dotenv==1.0.1
 pandas
+pyotp==2.9.0
+passlib[bcrypt]==1.7.4
+PyJWT==2.9.0

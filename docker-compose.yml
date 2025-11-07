@@ -33,6 +33,7 @@ services:
       DB_USER: esports
       DB_PASSWORD: esports
       DB_NAME: esports
+      JWT_SECRET: jwt-secret
     volumes:
       - ./backend:/app
     depends_on:

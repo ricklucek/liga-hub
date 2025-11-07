@@ -1,4 +1,3 @@
--- Core tables mapped from the user's CSV model
 CREATE TABLE IF NOT EXISTS players (
   UserID VARCHAR(36) PRIMARY KEY,
   Nome_Completo VARCHAR(255),
@@ -6,6 +5,15 @@ CREATE TABLE IF NOT EXISTS players (
   Cidade VARCHAR(255),
   Jogo_1 VARCHAR(100),
   Jogo_2 VARCHAR(100)
+);
+
+CREATE TABLE IF NOT EXISTS users (
+  id VARCHAR(36) PRIMARY KEY,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  two_factor_enabled BOOLEAN DEFAULT FALSE,
+  two_factor_secret VARCHAR(32),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS organizations (
