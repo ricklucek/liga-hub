@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Web 2.0 themed utility classes */
+@layer components {
+  .panel {
+    @apply rounded-md border border-neutral-300 bg-white shadow-[0_1px_0_rgba(0,0,0,.06)];
+  }
+  .toolbar-btn {
+    @apply relative rounded border border-neutral-700 bg-white px-3 py-1.5 text-sm text-neutral-900 shadow-[0_1px_0_rgba(0,0,0,.08)] active:translate-y-px;
+  }
+  .tab-active {
+    @apply rounded-t-md border border-b-0 bg-white text-neutral-900 border-neutral-700 px-3 py-1.5 text-sm;
+  }
+  .tab {
+    @apply rounded-t-md border border-b-0 bg-white text-neutral-700 hover:bg-neutral-50 border-neutral-300 px-3 py-1.5 text-sm;
+  }
+  .badge {
+    @apply inline-flex items-center rounded bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-neutral-900 border border-neutral-700;
+  }
+  .input-inset {
+    @apply rounded border border-neutral-700 bg-white px-3 py-1.5 text-sm text-neutral-900 shadow-[inset_0_1px_2px_rgba(0,0,0,.03)] outline-none focus:ring-2 focus:ring-neutral-900/20;
+  }
+}
+
+/* Logo and brand styling */
+.logo-wrap {
+  display: inline-block;
+  position: relative;
+  border-radius: 9999px;
+  padding: 4px; /* inner padding between tick ring and image */
+  background: white;
+}
+.logo-wrap img { display: block; border-radius: 9999px; }
+
+/* Create a subtle tick/ring around the logo using a conic-gradient mask.
+   This produces small tick-like markings around the circle. */
+.logo-wrap::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 9999px;
+  pointer-events: none;
+  background: conic-gradient(#000 0deg 6deg, transparent 6deg 18deg);
+  opacity: 0.85;
+  mask: radial-gradient(farthest-side, transparent calc(100% - 8px), black calc(100% - 6px));
+}
+
+/* Orbitron brand text helper */
+.font-orbitron { font-family: 'Orbitron', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; }
+

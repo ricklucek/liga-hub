@@ -1,0 +1,96 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./data/dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  username     String   @unique
+  passwordHash String
+  displayName  String?
+  avatarUrl    String?
+  school       String?
+  role         Role     @default(USER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  sessions     Session[]
+  forumThreads ForumThread[]
+  forumPosts   ForumPost[]
+  forumVotes   ForumVote[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  tokenHash String   @unique
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  @@index([userId])
+}
+
+model ForumCategory {
+  id      Int           @id @default(autoincrement())
+  slug    String        @unique
+  name    String
+  threads ForumThread[]
+}
+
+model ForumThread {
+  id             Int           @id @default(autoincrement())
+  categoryId     Int
+  category       ForumCategory @relation(fields: [categoryId], references: [id])
+  authorId       String
+  author         User          @relation(fields: [authorId], references: [id])
+  title          String
+  body           String?
+  isPinned       Boolean       @default(false)
+  isLocked       Boolean       @default(false)
+  createdAt      DateTime      @default(now())
+  lastActivityAt DateTime      @default(now())
+  votes          ForumVote[]
+  posts          ForumPost[]
+
+  @@index([categoryId])
+  @@index([authorId])
+  @@index([lastActivityAt])
+}
+
+model ForumPost {
+  id        Int         @id @default(autoincrement())
+  threadId  Int
+  thread    ForumThread @relation(fields: [threadId], references: [id])
+  authorId  String
+  author    User        @relation(fields: [authorId], references: [id])
+  body      String
+  parentId  Int?
+  createdAt DateTime    @default(now())
+  deletedAt DateTime?
+
+  @@index([threadId])
+  @@index([authorId])
+}
+
+model ForumVote {
+  userId   String
+  threadId Int
+  value    Int
+  user     User        @relation(fields: [userId], references: [id])
+  thread   ForumThread @relation(fields: [threadId], references: [id])
+
+  @@id([userId, threadId])
+  @@index([threadId])
+}
+
+enum Role {
+  USER
+  MOD
+  ADMIN
+}

@@ -1,0 +1,1 @@
+// Placeholder for future global state (Redux/Zustand). Currently unused.
