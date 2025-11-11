@@ -4,7 +4,7 @@ import { AuthAPI, type User } from '../api/auth'
 interface AuthContextValue {
   user: User | null
   loading: boolean
-  register: (email: string, username: string, password: string) => Promise<void>
+  register: (email: string, username: string, password: string, role?: 'USER' | 'ORGANIZER') => Promise<void>
   login: (emailOrUsername: string, password: string) => Promise<void>
   logout: () => Promise<void>
   refetch: () => Promise<void>
@@ -32,9 +32,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     fetchUser()
   }, [])
 
-  const register = async (email: string, username: string, password: string) => {
+  const register = async (email: string, username: string, password: string, role: 'USER' | 'ORGANIZER' = 'USER') => {
     try {
-      const response = await AuthAPI.register({ email, username, password })
+      const response = await AuthAPI.register({ email, username, password, role })
       setUser(response.user)
     } catch (err) {
       throw err

@@ -2,6 +2,7 @@ export type Post = {
   id: string
   author: string
   avatar: string
+  avatarUrl?: string | null
   body: string
   image?: string | null
   likes: number

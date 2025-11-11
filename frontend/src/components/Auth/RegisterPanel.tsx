@@ -5,14 +5,17 @@ import { useAuth } from '../../context/AuthProvider'
 interface RegisterPanelProps {
   onClose: () => void
   onSwitchToLogin: () => void
+  // Called after a successful registration (user is set in context)
+  onSuccess?: () => void
 }
 
-export default function RegisterPanel({ onClose, onSwitchToLogin }: RegisterPanelProps) {
+export default function RegisterPanel({ onClose, onSwitchToLogin, onSuccess }: RegisterPanelProps) {
   const { register } = useAuth()
   const [email, setEmail] = useState('')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [isOrganizer, setIsOrganizer] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -34,7 +37,8 @@ export default function RegisterPanel({ onClose, onSwitchToLogin }: RegisterPane
     setLoading(true)
 
     try {
-      await register(email, username, password)
+      await register(email, username, password, isOrganizer ? 'ORGANIZER' : 'USER')
+      try { onSuccess && onSuccess() } catch (e) { /* ignore */ }
       onClose()
     } catch (err: any) {
       setError(err.message || 'Registration failed')
@@ -106,6 +110,11 @@ export default function RegisterPanel({ onClose, onSwitchToLogin }: RegisterPane
                   placeholder="••••••••"
                   required
                 />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input id="organizer" type="checkbox" checked={isOrganizer} onChange={(e)=>setIsOrganizer(e.target.checked)} className="form-checkbox" />
+                <label htmlFor="organizer" className="text-sm">Create account as an organizer</label>
               </div>
 
               <div className="flex items-center justify-between pt-2">

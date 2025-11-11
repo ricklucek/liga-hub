@@ -6,6 +6,7 @@ import { withCookies, getUserFromSession } from './middleware/auth.js'
 import authRoutes from './routes/auth.js'
 import forumsRoutes from './routes/forums.js'
 import adminRoutes from './routes/admin.js'
+import feedRoutes from './routes/feed.js'
 
 const app = express()
 
@@ -74,6 +75,7 @@ const handleError = (res, err) => {
 app.use('/api/auth', authRoutes)
 app.use('/api/forums', forumsRoutes)
 app.use('/api/admin', adminRoutes)
+app.use('/api/feed', feedRoutes)
 
 // Health check
 app.get('/api/health', (_req, res) => {

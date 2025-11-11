@@ -56,7 +56,7 @@ export function requireRole(role) {
       return res.status(401).json({ error: 'Unauthorized' })
     }
 
-    const order = { USER: 1, MOD: 2, ADMIN: 3 }
+    const order = { USER: 1, ORGANIZER: 1, MOD: 2, ADMIN: 3 }
     if (order[req.user.role] < order[role]) {
       return res.status(403).json({ error: 'Forbidden' })
     }

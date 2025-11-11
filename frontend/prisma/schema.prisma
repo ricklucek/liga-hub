@@ -23,6 +23,7 @@ model User {
   forumThreads ForumThread[]
   forumPosts   ForumPost[]
   forumVotes   ForumVote[]
+  feedPosts    FeedPost[]
 }
 
 model Session {
@@ -91,6 +92,21 @@ model ForumVote {
 
 enum Role {
   USER
+  ORGANIZER
   MOD
   ADMIN
+}
+
+model FeedPost {
+  id           String   @id @default(cuid())
+  authorId     String
+  author       User     @relation(fields: [authorId], references: [id])
+  body         String
+  imageBytes   Bytes?
+  imageMime    String?
+  imageFilename String?
+  createdAt    DateTime @default(now())
+
+  @@index([authorId])
+  @@index([createdAt])
 }

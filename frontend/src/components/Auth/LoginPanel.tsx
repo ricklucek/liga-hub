@@ -5,9 +5,11 @@ import { useAuth } from '../../context/AuthProvider'
 interface LoginPanelProps {
   onClose: () => void
   onSwitchToRegister: () => void
+  // Called after a successful login (user is set in context)
+  onSuccess?: () => void
 }
 
-export default function LoginPanel({ onClose, onSwitchToRegister }: LoginPanelProps) {
+export default function LoginPanel({ onClose, onSwitchToRegister, onSuccess }: LoginPanelProps) {
   const { login } = useAuth()
   const [emailOrUsername, setEmailOrUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -21,6 +23,8 @@ export default function LoginPanel({ onClose, onSwitchToRegister }: LoginPanelPr
 
     try {
       await login(emailOrUsername, password)
+      // Notify parent that login succeeded (so it can continue any pending action)
+      try { onSuccess && onSuccess() } catch (e) { /* ignore */ }
       onClose()
     } catch (err: any) {
       setError(err.message || 'Login failed')

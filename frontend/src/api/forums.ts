@@ -104,6 +104,9 @@ export const ForumsAPI = {
       body: JSON.stringify(payload),
     }),
 
+  /** List forum posts by a specific user (with first-level replies) */
+  postsByUser: (authorId: string) => api<{ posts: ForumPost[] & { thread?: { id: number; title: string; slug?: string } ; replies?: ForumPost[] }[] }>(`/api/forums/posts?authorId=${encodeURIComponent(authorId)}`),
+
   /**
    * Vote on a thread
    */

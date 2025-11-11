@@ -1,6 +1,6 @@
 import { api } from './http'
 
-export type Role = 'USER' | 'MOD' | 'ADMIN'
+export type Role = 'USER' | 'ORGANIZER' | 'MOD' | 'ADMIN'
 
 export interface User {
   id: string
@@ -9,6 +9,7 @@ export interface User {
   role: Role
   avatarUrl?: string | null
   school?: string | null
+  createdAt?: string | null
 }
 
 export interface AuthResponse {
@@ -28,8 +29,15 @@ export const AuthAPI = {
   /**
    * Register a new user account
    */
-  register: (payload: { email: string; username: string; password: string }) =>
+  register: (payload: { email: string; username: string; password: string; role?: 'USER' | 'ORGANIZER' }) =>
     api<AuthResponse>('/api/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
+  /** Update current user's avatar */
+  updateAvatar: (payload: { imageBase64: string | null; imageMime?: string | null; imageFilename?: string | null }) =>
+    api<AuthResponse>('/api/auth/avatar', {
       method: 'POST',
       body: JSON.stringify(payload),
     }),

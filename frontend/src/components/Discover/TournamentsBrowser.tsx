@@ -167,7 +167,8 @@ export default function TournamentsBrowser() {
       setEntrantsData(null)
       setSetsData(null)
       try {
-        const list = await sgg.tournaments([resolvedGame.id], 'BR', 20)
+  const gameId = String(resolvedGame!.id)
+  const list = await sgg.tournaments([gameId], 'BR', 20)
         if (!active) return
         setTournaments(list)
       } catch (err) {
@@ -220,7 +221,8 @@ export default function TournamentsBrowser() {
       setError(null)
       setEvents([])
       try {
-        const list = await sgg.eventsByTournament(selectedTournament.slug)
+  const slug = selectedTournament!.slug
+  const list = await sgg.eventsByTournament(slug)
         if (!active) return
         setEvents(list)
         const preferred =
@@ -258,7 +260,8 @@ export default function TournamentsBrowser() {
       setEntrantsLoading(true)
       setError(null)
       try {
-        const payload = await sgg.eventEntrants(selectedEventId, entrantsPage, 25)
+  const evId = selectedEventId as string
+  const payload = await sgg.eventEntrants(evId, entrantsPage, 25)
         if (!active) return
         setEntrantsData(payload)
       } catch (err) {
@@ -287,7 +290,8 @@ export default function TournamentsBrowser() {
       setSetsLoading(true)
       setError(null)
       try {
-        const payload = await sgg.eventSets(selectedEventId, setsPage, 20)
+  const evId = selectedEventId as string
+  const payload = await sgg.eventSets(evId, setsPage, 20)
         if (!active) return
         setSetsData(payload)
       } catch (err) {

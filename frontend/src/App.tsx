@@ -4,9 +4,11 @@ import ToolbarButton from './components/ToolbarButton'
 import Tab from './components/Tab'
 import Separator from './components/Separator'
 import Badge from './components/Badge'
+import { LEAGUE_GAMES } from './data/leagueGames'
 import Lightbox from './components/Lightbox'
 import Pagination from './components/Pagination'
 import NewPost from './components/NewPost'
+import { FeedAPI } from './api/feed'
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
 import { seedPosts } from './data/seed'
 import { filterPostsBySearch, paginate } from './utils/filters'
@@ -14,6 +16,8 @@ import ForumsView from './components/Forums/ForumsView'
 
 const LazyUserMenu = React.lazy(() => import('./components/UserMenu'))
 const LazyTournamentsBrowser = React.lazy(() => import('./components/Discover/TournamentsBrowser'))
+const LazyCalendarView = React.lazy(() => import('./components/Calendar/CalendarView'))
+const LazyProfileView = React.lazy(() => import('./components/ProfileView'))
 
 const LOGO_URL = '/ligahub-logo.png'
 
@@ -35,9 +39,59 @@ export default function App() {
 
   const [posts, setPosts] = useState(seedPosts)
 
-  function addPost(text: string) {
+  // Load persisted feed posts from server
+  React.useEffect(() => {
+    let mounted = true
+    FeedAPI.list()
+      .then((data) => {
+        if (!mounted) return
+        const mapped = data.map((p) => {
+          const initials = (p.author?.username || 'U').split(' ').map(s=>s[0]).slice(0,2).join('') || 'U'
+          return {
+            id: p.id,
+            author: p.author?.username || 'Unknown',
+            avatar: initials,
+            avatarUrl: p.author?.avatarUrl || null,
+            avatarInitials: initials,
+            body: p.body,
+            image: p.imageBase64 ? `data:${p.imageMime};base64,${p.imageBase64}` : null,
+            likes: 0,
+            comments: 0,
+            createdAt: new Date(p.createdAt).toISOString(),
+          }
+        })
+        setPosts(mapped)
+      })
+      .catch((err)=>{
+        console.error('Failed to load feed posts', err)
+      })
+    return () => { mounted = false }
+  }, [])
+
+  async function addPost(payload: { text: string; imageBase64?: string|null; imageMime?: string|null; imageFilename?: string|null }) {
+    const { text, imageBase64, imageMime, imageFilename } = payload
     if (!text.trim()) return
-    setPosts([{ id: `p${Date.now()}`, author: 'Você', avatar: 'VC', body: text.trim(), image: null, likes: 0, comments: 0, createdAt: new Date().toISOString() }, ...posts])
+
+    try {
+      const created = await FeedAPI.create({ body: text, imageBase64: imageBase64 || null, imageMime: imageMime || null, imageFilename: imageFilename || null })
+      const initials = (created.author?.username || 'VC').split(' ').map(s=>s[0]).slice(0,2).join('') || 'VC'
+      const mapped = {
+        id: created.id,
+        author: created.author?.username || 'Você',
+        avatar: initials,
+        avatarUrl: created.author?.avatarUrl || null,
+        avatarInitials: initials,
+        body: created.body,
+        image: created.imageBase64 ? `data:${created.imageMime};base64,${created.imageBase64}` : null,
+        likes: 0,
+        comments: 0,
+        createdAt: new Date(created.createdAt).toISOString(),
+      }
+      setPosts([mapped, ...posts])
+    } catch (err) {
+      console.error('Failed to create post, falling back to local only', err)
+      setPosts([{ id: `p${Date.now()}`, author: 'Você', avatar: 'VC', body: text.trim(), image: imageBase64 ? `data:${imageMime};base64,${imageBase64}` : null, likes: 0, comments: 0, createdAt: new Date().toISOString() }, ...posts])
+    }
   }
 
   const filteredPosts = useMemo(() => filterPostsBySearch(posts, search), [posts, search])
@@ -99,7 +153,13 @@ export default function App() {
               {filteredPosts.map(p => (
                 <Panel key={p.id}>
                   <div className="flex items-start gap-3 p-3">
-                    <div className="grid h-10 w-10 place-items-center rounded border border-neutral-400 bg-neutral-100 text-xs font-bold text-neutral-700">{p.avatar}</div>
+                    <div className="h-10 w-10 rounded overflow-hidden border border-neutral-400 bg-neutral-100 text-xs font-bold text-neutral-700">
+                      {p.avatarUrl ? (
+                        <img src={p.avatarUrl} alt={p.author} className="h-full w-full object-cover" />
+                      ) : (
+                        <div className="grid h-full w-full place-items-center">{p.avatar}</div>
+                      )}
+                    </div>
                     <div className="flex-1">
                       <div className="mb-1 flex items-center gap-2 text-xs text-neutral-600">
                         <span className="font-medium text-neutral-800">{p.author}</span>
@@ -139,8 +199,23 @@ export default function App() {
               </div>
             </>
           )}
+
+          {activeTab === 'calendar' && (
+            <div className="lg:col-span-8">
+              <React.Suspense fallback={<div className="p-3">Loading calendar…</div>}>
+                <LazyCalendarView />
+              </React.Suspense>
+            </div>
+          )}
+          {activeTab === 'profile' && (
+            <div className="lg:col-span-8">
+              <React.Suspense fallback={<div className="p-3">Loading profile…</div>}>
+                <LazyProfileView />
+              </React.Suspense>
+            </div>
+          )}
           {activeTab !== 'feed' && activeTab !== 'forums' && activeTab !== 'leagues' && (
-            <Panel><div className="p-3 text-sm text-neutral-700">This tab is part of the MVP shell. Wire up later.</div></Panel>
+            null
           )}
         </section>
 
@@ -149,7 +224,7 @@ export default function App() {
           <Panel>
             <div className="p-3">
               <div className="text-sm font-semibold">Trending Topics</div>
-              <div className="mt-2 flex flex-wrap gap-2">{['League of Legends','Counter‑Strike 2','Dota 2','Basquete Universitário'].map(t => (<span key={t} className="badge">{t}</span>))}</div>
+              <div className="mt-2 flex flex-wrap gap-2">{LEAGUE_GAMES.map(t => (<span key={t} className="badge">{t}</span>))}</div>
             </div>
           </Panel>
           <Panel>

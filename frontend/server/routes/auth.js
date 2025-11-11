@@ -13,6 +13,7 @@ const registerSchema = z.object({
   email: z.string().email().min(3).max(255),
   username: z.string().min(2).max(50).regex(/^[a-zA-Z0-9_-]+$/),
   password: z.string().min(6).max(100),
+  role: z.enum(['USER','ORGANIZER']).optional(),
 })
 
 const loginSchema = z.object({
@@ -26,7 +27,7 @@ const loginSchema = z.object({
  */
 router.post('/register', authLimiter, validate(registerSchema), async (req, res) => {
   try {
-    const { email, username, password } = req.body
+  const { email, username, password, role } = req.body
 
     // Check if user already exists
     const existing = await db.user.findFirst({
@@ -48,7 +49,7 @@ router.post('/register', authLimiter, validate(registerSchema), async (req, res)
         email,
         username,
         passwordHash,
-        role: 'USER',
+        role: role === 'ORGANIZER' ? 'ORGANIZER' : 'USER',
       },
     })
 
@@ -182,8 +183,40 @@ router.get('/me', async (req, res) => {
       role: req.user.role,
       avatarUrl: req.user.avatarUrl,
       school: req.user.school,
+      createdAt: req.user.createdAt,
     },
   })
+})
+
+
+/**
+ * POST /api/auth/avatar
+ * Update current user's avatar (imageBase64 + imageMime)
+ */
+router.post('/avatar', requireAuth, async (req, res) => {
+  try {
+    const { imageBase64, imageMime, imageFilename } = req.body || {}
+    const dataUrl = imageBase64 ? `data:${imageMime};base64,${imageBase64}` : null
+    const updated = await db.user.update({
+      where: { id: req.user.id },
+      data: { avatarUrl: dataUrl },
+    })
+
+    res.json({
+      user: {
+        id: updated.id,
+        username: updated.username,
+        email: updated.email,
+        role: updated.role,
+        avatarUrl: updated.avatarUrl,
+        school: updated.school,
+        createdAt: updated.createdAt,
+      },
+    })
+  } catch (err) {
+    console.error('Update avatar error:', err)
+    res.status(500).json({ error: 'Failed to update avatar' })
+  }
 })
 
 export default router

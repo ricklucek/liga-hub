@@ -345,3 +345,42 @@ router.post('/threads/:id/vote', requireAuth, voteLimiter, validate(voteSchema),
 })
 
 export default router
+
+/**
+ * GET /api/forums/posts?authorId=...
+ * List forum posts authored by a user, include thread summary and first-level replies
+ */
+router.get('/posts', async (req, res) => {
+  try {
+    const { authorId } = req.query
+    console.log('GET /api/forums/posts authorId=', authorId)
+    if (!authorId) return res.status(400).json({ error: 'Missing authorId' })
+
+    const posts = await db.forumPost.findMany({
+      where: { authorId: String(authorId), deletedAt: null },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        author: { select: { id: true, username: true, avatarUrl: true, role: true } },
+        // ForumThread does not have a `slug` field in the schema; only select valid fields
+        thread: { select: { id: true, title: true } },
+      },
+      take: 200,
+    })
+
+    // Fetch first-level replies for each post
+    const results = await Promise.all(posts.map(async (p) => {
+      const replies = await db.forumPost.findMany({
+        where: { parentId: p.id, deletedAt: null },
+        orderBy: { createdAt: 'asc' },
+        include: { author: { select: { id: true, username: true, avatarUrl: true, role: true } } },
+      })
+      return { ...p, replies }
+    }))
+    console.log(`Found ${results.length} forum posts for ${authorId}`)
+
+    res.json({ posts: results })
+  } catch (err) {
+    console.error('List posts by user error:', err)
+    res.status(500).json({ error: 'Failed to fetch user posts' })
+  }
+})
